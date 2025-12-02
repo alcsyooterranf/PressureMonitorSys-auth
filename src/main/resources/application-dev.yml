@@ -1,0 +1,78 @@
+server:
+  port: 8093
+
+spring:
+  application:
+    name: PressureMonitorSys-auth
+
+  # 禁用Spring Cloud版本兼容性检查
+  cloud:
+    compatibility-verifier:
+      enabled: false
+
+  # Redis配置（与gateway共享同一个Redis）
+  data:
+    redis:
+      host: 47.109.128.246
+      port: 6379
+      password: 1234
+      database: 1
+      jedis:
+        pool:
+          max-active: 8
+          max-wait: 1ms
+          max-idle: 4
+          min-idle: 0
+  
+  # 数据库配置（与gateway共享同一个数据库）
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://webserver.aequilibrium.cn:13306/pressuremonitorsys?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=GMT%2B8
+    username: root
+    password: 123456
+    hikari:
+      minimum-idle: 3
+      maximum-pool-size: 10
+      idle-timeout: 30000
+      connection-timeout: 30000
+      pool-name: HikariCP
+
+# MyBatis Plus配置
+mybatis-plus:
+  mapper-locations: classpath:/mybatis/mapper/*.xml
+  type-aliases-package: org.example.infrastructure.mapper.po
+  configuration:
+    # 开启下划线转驼峰
+    map-underscore-to-camel-case: true
+    cache-enabled: false
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      # 表前缀，开发表 r_
+      table-prefix: r_
+
+# 前端跨域配置
+cors:
+  allowed-origins: "*"
+  allowed-methods: GET,POST
+  allowed-headers: "*"
+  allow-credentials: true
+  max-age: 3600
+
+# 日志配置
+logging:
+  level:
+    root: INFO
+    org.example: DEBUG
+    org.springframework.security: DEBUG
+
+# Actuator 配置
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
+
