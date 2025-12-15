@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.pms.core.infrastructure.mapper.IUserMapper">
+    <resultMap id="userResultMap" type="org.pms.core.infrastructure.mapper.po.UserPO">
+        <id property="id" column="id"/>
+        <result property="username" column="username"/>
+        <result property="password" column="password"/>
+        <result property="phone" column="phone"/>
+        <result property="locked" column="is_locked" javaType="java.lang.Boolean"/>
+        <result property="removed" column="is_removed" javaType="java.lang.Boolean"/>
+        <result property="createTime" column="create_time"/>
+        <result property="createBy" column="create_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="deleteTime" column="delete_time"/>
+        <result property="deleteBy" column="delete_by"/>
+    </resultMap>
+
+    <select id="selectRoleByName" resultType="java.lang.String">
+        SELECT r.name
+        FROM r_user u
+                 INNER JOIN r_user_role ur ON u.id = ur.user_id
+                 INNER JOIN r_role r ON ur.role_id = r.id
+        WHERE u.username = #{username}
+          AND u.is_removed = 0
+          AND u.is_locked = 0
+    </select>
+
+    <select id="selectAuthoritiesByName" resultType="java.lang.String">
+        SELECT p.name
+        FROM r_user u
+                 INNER JOIN r_user_role ur ON u.id = ur.user_id
+                 INNER JOIN r_role_permission rp ON ur.role_id = rp.role_id
+                 INNER JOIN r_permission p ON rp.permission_id = p.id
+        WHERE u.username = #{name}
+          AND u.is_removed = 0
+          AND u.is_locked = 0
+    </select>
+
+    <select id="selectUserByName" resultMap="userResultMap" parameterType="String">
+        SELECT id,
+               username,
+               password,
+               phone,
+               is_locked,
+               create_time,
+               create_by,
+               update_time,
+               update_by,
+               delete_time,
+               delete_by,
+               is_removed
+        FROM r_user
+        WHERE username = #{username}
+          AND is_removed = 0
+          AND is_locked = 0
+    </select>
+</mapper>
