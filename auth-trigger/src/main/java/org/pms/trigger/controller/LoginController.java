@@ -1,14 +1,15 @@
 package org.pms.trigger.controller;
 
-import com.pms.types.Constants;
-import com.pms.types.ResponseCode;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.pms.core.common.HttpResponse;
 import org.pms.core.domain.model.entity.LoginUser;
 import org.pms.core.domain.model.valobj.UserTokenVO;
 import org.pms.core.domain.repository.IAuthRepository;
 import org.pms.core.domain.service.ILoginService;
+import org.pms.types.AuthCode;
+import org.pms.types.AuthConstants;
+import org.pms.types.Response;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -30,20 +31,15 @@ import java.util.Map;
 @RequestMapping("/auth")
 public class LoginController {
 	
-	private static final String TOKEN_HEADER = Constants.TOKEN_HEADER;
-	private static final String TOKEN_PREFIX = Constants.TOKEN_PREFIX;
+	private static final String TOKEN_HEADER = AuthConstants.TOKEN_HEADER;
+	private static final String TOKEN_PREFIX = AuthConstants.TOKEN_PREFIX;
 	
-	private final AuthenticationManager authenticationManager;
-	private final IAuthRepository authRepository;
-	private final ILoginService loginService;
-	
-	public LoginController(AuthenticationManager authenticationManager,
-						   IAuthRepository authRepository,
-						   ILoginService loginService) {
-		this.authenticationManager = authenticationManager;
-		this.authRepository = authRepository;
-		this.loginService = loginService;
-	}
+	@Resource
+	private AuthenticationManager authenticationManager;
+	@Resource
+	private IAuthRepository authRepository;
+	@Resource
+	private ILoginService loginService;
 	
 	/**
 	 * 用户登录接口
@@ -54,8 +50,7 @@ public class LoginController {
 	 * @return 登录结果（包含accessToken、refreshToken、publicKey64、authorities）
 	 */
 	@PostMapping("/login")
-	public HttpResponse<Map<String, Object>> login(@RequestParam String username,
-												   @RequestParam String password) {
+	public Response<Map<String, Object>> login(@RequestParam String username, @RequestParam String password) {
 		log.info("用户登录请求, username: {}", username);
 		
 		try {
@@ -67,10 +62,7 @@ public class LoginController {
 			LoginUser loginUser = (LoginUser) authentication.getPrincipal();
 			if (loginUser == null) {
 				log.error("认证成功但用户信息为空, username: {}", username);
-				return HttpResponse.<Map<String, Object>>builder()
-						.code(ResponseCode.AUTHENTICATED_USER_NOT_EXIST.getCode())
-						.message(ResponseCode.AUTHENTICATED_USER_NOT_EXIST.getMessage())
-						.build();
+				return Response.<Map<String, Object>>builder().code(AuthCode.AUTHENTICATED_USER_NOT_EXIST.getCode()).message(AuthCode.AUTHENTICATED_USER_NOT_EXIST.getMessage()).build();
 			}
 			
 			// 3. 生成并保存token
@@ -78,10 +70,7 @@ public class LoginController {
 			
 			if (loginUser.getTokenVO() == null) {
 				log.error("Token生成失败, username: {}", username);
-				return HttpResponse.<Map<String, Object>>builder()
-						.code(ResponseCode.CREATED_TOKEN_NOT_EXIST.getCode())
-						.message(ResponseCode.CREATED_TOKEN_NOT_EXIST.getMessage())
-						.build();
+				return Response.<Map<String, Object>>builder().code(AuthCode.CREATED_TOKEN_NOT_EXIST.getCode()).message(AuthCode.CREATED_TOKEN_NOT_EXIST.getMessage()).build();
 			}
 			
 			// 4. 构造返回结果
@@ -92,18 +81,11 @@ public class LoginController {
 			result.put("publicKey64", loginUser.getTokenVO().getPublicKey64());
 			
 			log.info("用户登录成功, username: {}", username);
-			return HttpResponse.<Map<String, Object>>builder()
-					.code(ResponseCode.LOGIN_SUCCESS.getCode())
-					.message(ResponseCode.LOGIN_SUCCESS.getMessage())
-					.data(result)
-					.build();
+			return Response.<Map<String, Object>>builder().code(AuthCode.LOGIN_SUCCESS.getCode()).message(AuthCode.LOGIN_SUCCESS.getMessage()).data(result).build();
 			
 		} catch (Exception e) {
 			log.error("用户登录失败, username: {}, error: {}", username, e.getMessage());
-			return HttpResponse.<Map<String, Object>>builder()
-					.code(ResponseCode.LOGIN_FAIL.getCode())
-					.message(ResponseCode.LOGIN_FAIL.getMessage())
-					.build();
+			return Response.<Map<String, Object>>builder().code(AuthCode.LOGIN_FAIL.getCode()).message(AuthCode.LOGIN_FAIL.getMessage()).build();
 		}
 	}
 	
@@ -115,7 +97,7 @@ public class LoginController {
 	 * @return 新的accessToken
 	 */
 	@PostMapping("/refresh")
-	public HttpResponse<UserTokenVO> refresh(@RequestHeader(TOKEN_HEADER) String authHeader) {
+	public Response<UserTokenVO> refresh(@RequestHeader(TOKEN_HEADER) String authHeader) {
 		log.info("刷新token请求");
 		
 		try {
@@ -124,28 +106,18 @@ public class LoginController {
 			
 			if (StringUtils.isBlank(refreshToken)) {
 				log.error("refreshToken为空");
-				return HttpResponse.<UserTokenVO>builder()
-						.code(ResponseCode.REFRESH_TOKEN_NOT_EXIST.getCode())
-						.message(ResponseCode.REFRESH_TOKEN_NOT_EXIST.getMessage())
-						.build();
+				return Response.<UserTokenVO>builder().code(AuthCode.REFRESH_TOKEN_NOT_EXIST.getCode()).message(AuthCode.REFRESH_TOKEN_NOT_EXIST.getMessage()).build();
 			}
 			
 			// 2. 刷新token
 			UserTokenVO userTokenVO = loginService.doRefresh(refreshToken);
 			
 			log.info("刷新token成功");
-			return HttpResponse.<UserTokenVO>builder()
-					.code(ResponseCode.SUCCESS.getCode())
-					.message(ResponseCode.SUCCESS.getMessage())
-					.data(userTokenVO)
-					.build();
+			return Response.<UserTokenVO>builder().code(AuthCode.SUCCESS.getCode()).message(AuthCode.SUCCESS.getMessage()).data(userTokenVO).build();
 			
 		} catch (Exception e) {
 			log.error("刷新token失败, error: {}", e.getMessage());
-			return HttpResponse.<UserTokenVO>builder()
-					.code(ResponseCode.REFRESH_TOKEN_NOT_EXIST.getCode())
-					.message(ResponseCode.REFRESH_TOKEN_NOT_EXIST.getMessage())
-					.build();
+			return Response.<UserTokenVO>builder().code(AuthCode.REFRESH_TOKEN_NOT_EXIST.getCode()).message(AuthCode.REFRESH_TOKEN_NOT_EXIST.getMessage()).build();
 		}
 	}
 	
@@ -154,13 +126,9 @@ public class LoginController {
 	 * GET /auth/success
 	 */
 	@GetMapping("/success")
-	public HttpResponse<String> success() {
+	public Response<String> success() {
 		log.info("测试接口调用成功");
-		return HttpResponse.<String>builder()
-				.code(ResponseCode.SUCCESS.getCode())
-				.message(ResponseCode.SUCCESS.getMessage())
-				.data("Auth service is running")
-				.build();
+		return Response.<String>builder().code(AuthCode.SUCCESS.getCode()).message(AuthCode.SUCCESS.getMessage()).data("Auth service is running").build();
 	}
 	
 }

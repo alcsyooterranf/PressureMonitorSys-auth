@@ -1,12 +1,11 @@
 package org.pms.core.infrastructure.utils;
 
-import com.pms.types.AppException;
-import com.pms.types.Constants;
-import com.pms.types.ResponseCode;
 import lombok.extern.slf4j.Slf4j;
 import org.pms.core.domain.model.entity.LoginUser;
 import org.pms.core.domain.model.valobj.UserTokenVO;
 import org.pms.core.infrastructure.redis.RedisUtil;
+import org.pms.types.AuthCode;
+import org.pms.types.AuthConstants;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -17,10 +16,10 @@ import org.springframework.stereotype.Service;
 @Service
 public class TokenUtil {
 	
-	private static final Long ACCESS_EXPIRATION = Constants.ACCESS_EXPIRATION;
-	private static final Long REFRESH_EXPIRATION = Constants.REFRESH_EXPIRATION;
-	private static final String REDIS_KEY_PREFIX_ACCESS = Constants.REDIS_KEY_PREFIX_ACCESS;
-	private static final String REDIS_KEY_PREFIX_REFRESH = Constants.REDIS_KEY_PREFIX_REFRESH;
+	private static final Long ACCESS_EXPIRATION = AuthConstants.ACCESS_EXPIRATION;
+	private static final Long REFRESH_EXPIRATION = AuthConstants.REFRESH_EXPIRATION;
+	private static final String REDIS_KEY_PREFIX_ACCESS = AuthConstants.REDIS_KEY_PREFIX_ACCESS;
+	private static final String REDIS_KEY_PREFIX_REFRESH = AuthConstants.REDIS_KEY_PREFIX_REFRESH;
 	
 	private final RedisUtil redisUtil;
 	
@@ -90,9 +89,9 @@ public class TokenUtil {
 	 */
 	public void isRefreshTokenExist(String jti) {
 		if (!redisUtil.hasKey(REDIS_KEY_PREFIX_REFRESH + jti)) {
-			log.error("异常代码: {}, 异常信息: {}", ResponseCode.REFRESH_TOKEN_NOT_EXIST.getCode(),
-					ResponseCode.REFRESH_TOKEN_NOT_EXIST.getMessage());
-			throw new AppException(ResponseCode.REFRESH_TOKEN_NOT_EXIST);
+			log.error("异常代码: {}, 异常信息: {}", AuthCode.REFRESH_TOKEN_NOT_EXIST.getCode(),
+					AuthCode.REFRESH_TOKEN_NOT_EXIST.getMessage());
+			throw new RuntimeException(AuthCode.REFRESH_TOKEN_NOT_EXIST.getMessage());
 		}
 	}
 	

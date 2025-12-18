@@ -2,8 +2,9 @@ package org.pms.trigger.rpc;
 
 import lombok.extern.slf4j.Slf4j;
 import org.pms.api.IAuthRpcService;
-import org.pms.api.common.RpcResponse;
 import org.pms.core.infrastructure.utils.JwtUtil;
+import org.pms.types.AuthCode;
+import org.pms.types.Response;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -22,13 +23,13 @@ public class AuthRpcService implements IAuthRpcService {
 	
 	@Override
 	@GetMapping("/publicKey")
-	public RpcResponse<String> getPublicKey() {
+	public Response<String> getPublicKey() {
 		try {
 			String publicKeyBase64 = JwtUtil.getPublicKeyStr();
 			log.info("RPC接口：公钥获取成功");
-			return RpcResponse.<String>builder()
-					.code("200")
-					.message("success")
+			return Response.<String>builder()
+					.code(AuthCode.SUCCESS.getCode())
+					.message(AuthCode.SUCCESS.getMessage())
 					.data(publicKeyBase64)
 					.build();
 		} catch (Exception e) {
@@ -39,7 +40,7 @@ public class AuthRpcService implements IAuthRpcService {
 	
 	@Override
 	@PostMapping("/checkPublicKey")
-	public RpcResponse<Boolean> checkPublicKey(@RequestBody String publicKey) {
+	public Response<Boolean> checkPublicKey(@RequestBody String publicKey) {
 		try {
 			String serverPublicKey = JwtUtil.getPublicKeyStr();
 			boolean isMatch = serverPublicKey.equals(publicKey);
@@ -48,8 +49,8 @@ public class AuthRpcService implements IAuthRpcService {
 			} else {
 				log.warn("RPC接口：公钥校验失败，公钥不一致");
 			}
-			return RpcResponse.<Boolean>builder()
-					.code("200")
+			return Response.<Boolean>builder()
+					.code(AuthCode.SUCCESS.getCode())
 					.data(isMatch)
 					.build();
 		} catch (Exception e) {

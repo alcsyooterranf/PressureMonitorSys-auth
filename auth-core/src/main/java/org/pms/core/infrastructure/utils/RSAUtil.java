@@ -1,7 +1,7 @@
 package org.pms.core.infrastructure.utils;
 
-import com.pms.types.Constants;
 import lombok.extern.slf4j.Slf4j;
+import org.pms.types.AuthConstants;
 import org.springframework.util.ObjectUtils;
 
 import java.io.*;
@@ -22,9 +22,9 @@ import java.util.Base64;
 @Slf4j
 public class RSAUtil {
 	
-	private static final String ALGORITHM = Constants.ALGORITHM;
-	private static final String PUBLIC_KEY_FILENAME = Constants.PUBLIC_KEY_FILENAME;
-	private static final String PRIVATE_KEY_FILENAME = Constants.PRIVATE_KEY_FILENAME;
+	private static final String ALGORITHM = AuthConstants.ALGORITHM;
+	private static final String PUBLIC_KEY_FILENAME = AuthConstants.PUBLIC_KEY_FILENAME;
+	private static final String PRIVATE_KEY_FILENAME = AuthConstants.PRIVATE_KEY_FILENAME;
 	// TODO: 静态变量
 	private static final String LOCAL_KEY_PATH = "data/keys";
 	
@@ -73,13 +73,13 @@ public class RSAUtil {
 		// 使用 File 构造器正确拼接路径，避免跨平台路径分隔符问题
 		File publicKeyFile = new File(dir, PUBLIC_KEY_FILENAME);
 		File privateKeyFile = new File(dir, PRIVATE_KEY_FILENAME);
-
+		
 		try (OutputStreamWriter publicWriter = new OutputStreamWriter(
 				new FileOutputStream(publicKeyFile), StandardCharsets.UTF_8)) {
 			publicWriter.write(key2Base64(key.getPublic()));
 			publicWriter.flush();
 		}
-
+		
 		try (OutputStreamWriter privateWriter = new OutputStreamWriter(
 				new FileOutputStream(privateKeyFile), StandardCharsets.UTF_8)) {
 			privateWriter.write(key2Base64(key.getPrivate()));
@@ -108,7 +108,7 @@ public class RSAUtil {
 		File dir = new File(LOCAL_KEY_PATH);
 		File publicKeyFile = new File(dir, PUBLIC_KEY_FILENAME);
 		File privateKeyFile = new File(dir, PRIVATE_KEY_FILENAME);
-
+		
 		PublicKey publicKey = loadPublicKey(publicKeyFile.getPath());
 		PrivateKey privateKey = loadPrivateKey(privateKeyFile.getPath());
 		if (ObjectUtils.isEmpty(publicKey) || ObjectUtils.isEmpty(privateKey)) {

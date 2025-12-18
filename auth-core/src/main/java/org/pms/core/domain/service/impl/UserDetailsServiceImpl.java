@@ -1,6 +1,5 @@
 package org.pms.core.domain.service.impl;
 
-import com.pms.types.AssertUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.pms.core.domain.model.aggregate.UserAggregate;
 import org.pms.core.domain.model.entity.LoginUser;
@@ -10,6 +9,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+
+import java.util.Objects;
 
 /**
  * UserDetails实现，负责用户认证
@@ -31,7 +32,10 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 		// 1. 从数据库中查询用户信息
 		UserEntity userEntity = userRepository.getUserEntityByUsername(username);
-		AssertUtils.notNull(userEntity, "用户不存在");
+		if (Objects.isNull(userEntity)) {
+			log.error("用户不存在");
+			throw new RuntimeException("用户不存在");
+		}
 		// 2. 将用户信息封装成UserAggregate对象
 		UserAggregate userAggregate = UserAggregate.builder()
 				.id(userEntity.getId())

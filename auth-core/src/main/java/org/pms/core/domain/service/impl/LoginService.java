@@ -1,6 +1,5 @@
 package org.pms.core.domain.service.impl;
 
-import com.pms.types.AssertUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.pms.core.domain.model.valobj.UserTokenVO;
 import org.pms.core.domain.repository.IAuthRepository;
@@ -29,13 +28,11 @@ public class LoginService implements ILoginService {
 	 */
 	@Override
 	public UserTokenVO doRefresh(String refreshToken) {
-		AssertUtils.notNull(refreshToken, "refreshToken不能为空");
 		UserTokenVO userTokenVO = UserTokenVO.builder()
 				.refreshToken(refreshToken)
 				.publicKey64(JwtUtil.getPublicKeyStr())
 				.build();
 		authRepository.updateUserToken(userTokenVO);
-		AssertUtils.notNull(userTokenVO.getAccessToken(), "刷新失败");
 		return userTokenVO;
 	}
 	

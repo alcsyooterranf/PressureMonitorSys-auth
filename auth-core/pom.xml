@@ -102,12 +102,6 @@
             <artifactId>lombok-mapstruct-binding</artifactId>
         </dependency>
 
-        <!-- Common模块 - 从本地Maven仓库引用 -->
-        <dependency>
-            <groupId>com.pms</groupId>
-            <artifactId>common-types</artifactId>
-        </dependency>
-
         <!-- Test - 版本由 spring-boot-starter-parent 管理 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -118,6 +112,11 @@
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.pms</groupId>
+            <artifactId>common-types</artifactId>
         </dependency>
     </dependencies>
 

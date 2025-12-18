@@ -1,8 +1,5 @@
 package org.pms.core.infrastructure.utils;
 
-import com.pms.types.AppException;
-import com.pms.types.Constants;
-import com.pms.types.ResponseCode;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
@@ -10,8 +7,10 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.SignatureAlgorithm;
 import io.jsonwebtoken.security.SignatureException;
 import lombok.extern.slf4j.Slf4j;
-import org.pms.core.initialization.AuthRunner;
 import org.pms.core.domain.model.entity.LoginUser;
+import org.pms.core.initialization.AuthRunner;
+import org.pms.types.AuthCode;
+import org.pms.types.AuthConstants;
 
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -20,39 +19,39 @@ import java.util.*;
 /**
  * JWT工具类（Auth服务专用）
  * Auth服务持有私钥和公钥，用于签发和验证JWT
- *
+ * <p>
  * 注意：密钥由 {@link AuthRunner} 统一初始化管理
  *
  * @author alcsyooterranf
  */
 @Slf4j
 public class JwtUtil {
-
+	
 	private static final SignatureAlgorithm ALGORITHM = Jwts.SIG.RS256;
-	private static final Long REFRESH_EXPIRATION = Constants.REFRESH_EXPIRATION;
-	private static final String ISS = Constants.ISS;
-	private static final String USER_ID = Constants.USER_ID;
-	private static final String USER_NAME = Constants.USER_NAME;
-	private static final String AUTHORITIES = Constants.AUTHORITIES;
-
+	private static final Long REFRESH_EXPIRATION = AuthConstants.REFRESH_EXPIRATION;
+	private static final String ISS = AuthConstants.ISS;
+	private static final String USER_ID = AuthConstants.USER_ID;
+	private static final String USER_NAME = AuthConstants.USER_NAME;
+	private static final String AUTHORITIES = AuthConstants.AUTHORITIES;
+	
 	// 私有构造函数，防止实例化
 	private JwtUtil() {
 	}
-
+	
 	/**
 	 * 获取公钥（从 ApplicationInitializer 获取）
 	 */
 	private static PublicKey getPublicKey() {
 		return AuthRunner.getPublicKey();
 	}
-
+	
 	/**
 	 * 获取私钥（从 ApplicationInitializer 获取）
 	 */
 	private static PrivateKey getPrivateKey() {
 		return AuthRunner.getPrivateKey();
 	}
-
+	
 	/**
 	 * 获取Base64编码的公钥字符串
 	 *
@@ -147,19 +146,20 @@ public class JwtUtil {
 					.getPayload();
 		} catch (JwtException e) {
 			if (e instanceof ExpiredJwtException) {
-				log.error("异常代码: {}, 异常信息: {}", ResponseCode.TOKEN_EXPIRED.getCode(),
-						ResponseCode.TOKEN_EXPIRED.getMessage());
-				throw new AppException(ResponseCode.TOKEN_EXPIRED, e);
+				log.error("异常代码: {}, 异常信息: {}", AuthCode.TOKEN_EXPIRED.getCode(),
+						AuthCode.TOKEN_EXPIRED.getMessage());
+				throw new RuntimeException(AuthCode.TOKEN_EXPIRED.getMessage(), e);
 			} else if (e instanceof SignatureException) {
-				log.error("异常代码: {}, 异常信息: {}", ResponseCode.TOKEN_TAMPERED.getCode(),
-						ResponseCode.TOKEN_TAMPERED.getMessage());
-				throw new AppException(ResponseCode.TOKEN_TAMPERED, e);
+				log.error("异常代码: {}, 异常信息: {}", AuthCode.TOKEN_TAMPERED.getCode(),
+						AuthCode.TOKEN_TAMPERED.getMessage());
+				throw new RuntimeException(AuthCode.TOKEN_TAMPERED.getMessage(), e);
 			} else {
-				log.error("异常代码: {}, 异常信息: {}", ResponseCode.TOKEN_PARSE_ERROR.getCode(),
-						ResponseCode.TOKEN_PARSE_ERROR.getMessage());
-				throw new AppException(ResponseCode.TOKEN_PARSE_ERROR, e);
+				log.error("异常代码: {}, 异常信息: {}", AuthCode.TOKEN_PARSE_ERROR.getCode(),
+						AuthCode.TOKEN_PARSE_ERROR.getMessage());
+				throw new RuntimeException(AuthCode.TOKEN_PARSE_ERROR.getMessage(), e);
 			}
 		}
 		return claims;
 	}
+	
 }

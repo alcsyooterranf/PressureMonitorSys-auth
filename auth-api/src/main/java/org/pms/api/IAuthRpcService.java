@@ -1,6 +1,6 @@
 package org.pms.api;
 
-import org.pms.api.common.RpcResponse;
+import org.pms.types.Response;
 
 /**
  * Auth服务RPC接口
@@ -18,7 +18,7 @@ public interface IAuthRpcService {
 	 *
 	 * @return Base64编码的RSA公钥字符串
 	 */
-	RpcResponse<String> getPublicKey();
+	Response<String> getPublicKey();
 	
 	/**
 	 * 检查公钥是否一致
@@ -27,7 +27,7 @@ public interface IAuthRpcService {
 	 * @param publicKey Consumer端持有的Base64编码公钥字符串
 	 * @return true-公钥一致，false-公钥不一致
 	 */
-	RpcResponse<Boolean> checkPublicKey(String publicKey);
+	Response<Boolean> checkPublicKey(String publicKey);
 	
 }
 
